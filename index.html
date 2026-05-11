@@ -3,57 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Mis Ojitos Brillantes 💕</title>
+    <title>Para mi mundo entero 💕</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #1a0b2e; /* Fondo oscuro tipo galaxia */
-            color: white;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .mensaje {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .corazon {
-            font-size: 50px;
-            margin-bottom: 10px;
-        }
-        .reproductor {
-            margin-top: 20px;
-            background: #331a4d;
-            padding: 15px;
-            border-radius: 15px;
-            width: 80%;
-            max-width: 300px;
-        }
+        body { margin: 0; overflow: hidden; background: #050210; font-family: 'Arial', sans-serif; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+        .overlay { position: absolute; top: 10%; width: 100%; text-align: center; color: white; pointer-events: none; z-index: 10; }
+        .burbuja { background: rgba(255, 255, 255, 0.1); padding: 15px 30px; border-radius: 50px; display: inline-block; backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); font-weight: bold; animation: flotar 3s ease-in-out infinite; box-shadow: 0 0 20px rgba(157, 80, 187, 0.3); }
+        #frase-estelar { position: absolute; width: 100%; top: 45%; text-align: center; color: white; font-size: 24px; font-weight: bold; text-shadow: 0 0 20px #fff, 0 0 30px #9d50bb; pointer-events: none; display: none; z-index: 20; transition: opacity 1s; }
+        @keyframes flotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .reproductor-card { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(15, 5, 30, 0.9); padding: 20px; border-radius: 25px; width: 280px; color: white; text-align: center; border: 1px solid #9d50bb; z-index: 10; box-shadow: 0 -5px 25px rgba(0,0,0,0.8); }
+        audio { width: 100%; height: 35px; margin-top: 10px; }
     </style>
 </head>
 <body>
-
-    <div class="mensaje">
-        <div class="corazon">💕</div>
-        <p>Te Amo Muchote Mis Ojitos Brillantes</p>
+    <div id="canvas-container"></div>
+    <div id="frase-estelar"></div>
+    <div class="overlay">
+        <div class="burbuja">Te Amo Muchote Mis Ojitos Brillantes 💕<br><span style="font-size: 12px;">Eres mi mundo entero</span></div>
+    </div>
+    <div class="reproductor-card">
+        <div style="font-size: 14px; font-weight: bold; letter-spacing: 1px;">🎵 BLUE - Billie Eilish</div>
+        <audio id="musica" controls><source src="blue.mp3" type="audio/mpeg"></audio>
     </div>
 
-    <div class="reproductor">
-        <p style="font-size: 12px; margin-bottom: 5px;">Reproduciendo: BLUE - Billie Eilish</p>
-        <!-- Sustituye 'tu-archivo-de-musica.mp3' por el link directo de tu canción -->
-        <audio id="cancion" controls style="width: 100%;">
-            <source src="URL_DE_TU_CANCION.mp3" type="audio/mpeg">
-            Tu navegador no soporta el audio.
-        </audio>
-    </div>
-
+    <script src="https://cloudflare.com"></script>
+    <script>
+        const mensajesAmor = [
+            "Eres el centro de mi universo 💕", 
+            "Mi lugar favorito es a tu lado",
+            "Tus ojos brillan más que estas estrellas", 
+            "Eres mi razón de sonreír cada día",
+            "Te amo más allá del infinito", 
+            "Eres mi mundo entero 💕",
+            "Mi felicidad tiene tu nombre", 
+            "Gracias por ser mi princesa hermosa",
+            "Contigo el universo es perfecto",
+            "Eres mi sueño hecho realidad 💕",
+            "Iluminas mi vida como ninguna otra estrella"
+        ];
+        
+        let scene, camera, renderer, stars;
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 1; camera.rotation.x = Math.PI/2;
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            const starGeo = new THREE.BufferGeometry();
+            const posArray = new Float32Array(6000 * 3);
+            for(let i=0; i<6000*3; i++) posArray[i] = (Math.random() - 0.5) * 600;
+            starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.8 }));
+            scene.add(stars);
+            animate();
+            setInterval(() => {
+                const el = document.getElementById('frase-estelar');
+                el.innerText = mensajesAmor[Math.floor(Math.random() * mensajesAmor.length)];
+                el.style.display = 'block';
+                el.style.opacity = 1;
+                setTimeout(() => { 
+                    el.style.opacity = 0;
+                    setTimeout(() => { el.style.display = 'none'; }, 1000);
+                }, 4000);
+            }, 6000);
+        }
+        function animate() {
+            stars.rotation.y += 0.0015;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        init();
+    </script>
 </body>
 </html>
